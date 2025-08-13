@@ -69,6 +69,12 @@ importers:
       '@eslint/js':
         specifier: ^9.30.1
         version: 9.32.0
+      '@rollup/rollup-linux-arm64-gnu':
+        specifier: ^4.46.0
+        version: 4.46.2
+      '@rollup/rollup-linux-x64-gnu':
+        specifier: ^4.46.0
+        version: 4.46.2
       '@tailwindcss/postcss':
         specifier: ^4.1.11
         version: 4.1.11
@@ -4603,8 +4609,7 @@ snapshots:
   '@rollup/rollup-linux-arm-musleabihf@4.46.2':
     optional: true
 
-  '@rollup/rollup-linux-arm64-gnu@4.46.2':
-    optional: true
+  '@rollup/rollup-linux-arm64-gnu@4.46.2': {}
 
   '@rollup/rollup-linux-arm64-musl@4.46.2':
     optional: true
@@ -4624,8 +4629,7 @@ snapshots:
   '@rollup/rollup-linux-s390x-gnu@4.46.2':
     optional: true
 
-  '@rollup/rollup-linux-x64-gnu@4.46.2':
-    optional: true
+  '@rollup/rollup-linux-x64-gnu@4.46.2': {}
 
   '@rollup/rollup-linux-x64-musl@4.46.2':
     optional: true
