@@ -152,7 +152,12 @@ public abstract class BaseAgent {
                 taskCount.countDown();
             });
         }
-        ThreadUtil.await(taskCount);
+        try {
+            ThreadUtil.await(taskCount);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            log.warn("Tool execution interrupted", e);
+        }
         return result;
     }
 

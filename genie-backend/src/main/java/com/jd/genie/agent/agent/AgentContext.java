@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
+import java.util.Map;
 
 @Data
 @Builder
@@ -19,6 +20,20 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AgentContext {
+    /**
+     * Get available tools
+     */
+    public ToolCollection getAvailableTools() {
+        return toolCollection;
+    }
+    
+    /**
+     * Get LLM
+     */
+    public com.jd.genie.agent.llm.LLM getLlm() {
+        // This is a stub implementation for compatibility
+        return null;
+    }
     String requestId;
     String sessionId;
     String query;
@@ -33,4 +48,9 @@ public class AgentContext {
     String basePrompt;
     Integer agentType;
     List<File> taskProductFiles;
+    
+    // PromptFlow specific fields
+    String inlineMarkdown;
+    String markdownFlow;
+    Map<String, Object> flowVariables;
 }

@@ -1,8 +1,9 @@
 import React, { useMemo, useRef, useState } from "react";
-import { Input, Button, Tooltip } from "antd";
+import { Input, Tooltip } from "antd";
 import classNames from "classnames";
 import { TextAreaRef } from "antd/es/input/TextArea";
 import { getOS } from "@/utils";
+import AgentModeSelector from "@/components/AgentModeSelector";
 
 const { TextArea } = Input;
 
@@ -19,6 +20,8 @@ const GeneralInput: GenieType.FC<Props> = (props) => {
   const { placeholder, showBtn, disabled, product, send } = props;
   const [question, setQuestion] = useState<string>("");
   const [deepThink, setDeepThink] = useState<boolean>(false);
+  const [agentMode, setAgentMode] = useState<string>('react');
+  const [workflowTemplate, setWorkflowTemplate] = useState<string>('');
   const textareaRef = useRef<TextAreaRef>(null);
   const tempData = useRef<{
     cmdPress?: boolean;
@@ -29,8 +32,19 @@ const GeneralInput: GenieType.FC<Props> = (props) => {
     setQuestion(e.target.value);
   };
 
-  const changeThinkStatus = () => {
-    setDeepThink(!deepThink);
+  // const changeThinkStatus = () => {
+  //   setDeepThink(!deepThink);
+  // };
+
+  const handleAgentModeChange = (mode: string, template?: string) => {
+    setAgentMode(mode);
+    setWorkflowTemplate(template || '');
+    // 同步更新deepThink状态以保持向后兼容
+    if (mode === 'plan_solve') {
+      setDeepThink(true);
+    } else {
+      setDeepThink(false);
+    }
   };
 
   const pressEnter: React.KeyboardEventHandler<HTMLTextAreaElement> = () => {
@@ -65,6 +79,9 @@ const GeneralInput: GenieType.FC<Props> = (props) => {
       message: question,
       outputStyle: product?.type,
       deepThink,
+      agentMode,
+      workflowTemplate,
+      executionMode: 'batch'
     });
     setQuestion("");
   };
@@ -74,6 +91,9 @@ const GeneralInput: GenieType.FC<Props> = (props) => {
       message: question,
       outputStyle: product?.type,
       deepThink,
+      agentMode,
+      workflowTemplate,
+      executionMode: 'batch'
     });
     setQuestion("");
   };
@@ -123,21 +143,15 @@ const GeneralInput: GenieType.FC<Props> = (props) => {
           ) : null}
         </div>
         <div className="h-30 flex justify-between items-center mt-[6px]">
-          {showBtn ? (
-            <Button
-              color={deepThink ? "primary" : "default"}
-              variant="outlined"
-              className={classNames(
-                "text-[12px] p-[8px] h-[28px] transition-all hover:text-[#333] hover:bg-[rgba(64,64,255,0.02)] hover:border-[rgba(64,64,255,0.2)]",
-              )}
-              onClick={changeThinkStatus}
-            >
-              <i className="font_family icon-shendusikao"></i>
-              <span className="ml-[-4px]">深度研究</span>
-            </Button>
-          ) : (
-            <div></div>
-          )}
+          <div className="flex items-center gap-2">
+            {showBtn && (
+              <AgentModeSelector
+                value={agentMode}
+                onChange={handleAgentModeChange}
+                size="small"
+              />
+            )}
+          </div>
           <div className="flex items-center">
             <span className="text-[12px] text-gray-300 mr-8 flex items-center">
               {enterTip}

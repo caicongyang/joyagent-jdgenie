@@ -15,6 +15,20 @@ export const combineData = (
       handleTaskMessage(eventData, currentChat);
       break;
     }
+    case "workflow_start":
+    case "workflow_progress":
+    case "workflow_step":
+    case "workflow_complete":
+    case "workflow_error": {
+      handleWorkflowMessage(eventData, currentChat);
+      break;
+    }
+    case "prompt_flow_result":
+    case "prompt_flow_step":
+    case "prompt_flow_progress": {
+      handlePromptFlowMessage(eventData, currentChat);
+      break;
+    }
     default:
       break;
   }
@@ -72,6 +86,70 @@ function handleTaskMessage(
   const taskIndex = findTaskIndex(currentChat.multiAgent.tasks, eventData.taskId);
   if (eventData.resultMap?.messageType) {
     handleTaskMessageByType(eventData, currentChat, taskIndex);
+  }
+}
+
+/**
+ * 处理工作流类型的消息
+ * @param eventData 事件数据
+ * @param currentChat 当前聊天对象
+ */
+function handleWorkflowMessage(
+  eventData: MESSAGE.EventData,
+  currentChat: CHAT.ChatItem
+) {
+  if (!currentChat.multiAgent.tasks) {
+    currentChat.multiAgent.tasks = [];
+  }
+  
+  const taskIndex = findTaskIndex(currentChat.multiAgent.tasks, eventData.taskId);
+  
+  if (taskIndex === -1) {
+    // 创建新的工作流任务
+    currentChat.multiAgent.tasks.push([{
+      taskId: eventData.taskId,
+      ...eventData.resultMap,
+      messageType: eventData.messageType,
+    }]);
+  } else {
+    // 更新现有的工作流任务
+    const existingTask = currentChat.multiAgent.tasks[taskIndex][0];
+    Object.assign(existingTask, {
+      ...eventData.resultMap,
+      messageType: eventData.messageType,
+    });
+  }
+}
+
+/**
+ * 处理PromptFlow类型的消息
+ * @param eventData 事件数据
+ * @param currentChat 当前聊天对象
+ */
+function handlePromptFlowMessage(
+  eventData: MESSAGE.EventData,
+  currentChat: CHAT.ChatItem
+) {
+  if (!currentChat.multiAgent.tasks) {
+    currentChat.multiAgent.tasks = [];
+  }
+  
+  const taskIndex = findTaskIndex(currentChat.multiAgent.tasks, eventData.taskId);
+  
+  if (taskIndex === -1) {
+    // 创建新的PromptFlow任务
+    currentChat.multiAgent.tasks.push([{
+      taskId: eventData.taskId,
+      ...eventData.resultMap,
+      messageType: eventData.messageType,
+    }]);
+  } else {
+    // 更新现有的PromptFlow任务
+    const existingTask = currentChat.multiAgent.tasks[taskIndex][0];
+    Object.assign(existingTask, {
+      ...eventData.resultMap,
+      messageType: eventData.messageType,
+    });
   }
 }
 
@@ -506,6 +584,9 @@ export const handleTaskData = (
     "task_summary",
     "markdown",
     "ppt",
+    "prompt_flow_result",
+    "prompt_flow_step",
+    "prompt_flow_progress",
   ];
 
   currentChat.thought = planThought || "";
@@ -665,7 +746,15 @@ export const buildAction = (task: CHAT.Task) => {
     FILE: "file",
     KNOWLEDGE: "knowledge",
     DEEP_SEARCH: "deep_search",
-    MARKDOWN: "markdown"
+    MARKDOWN: "markdown",
+    WORKFLOW_START: "workflow_start",
+    WORKFLOW_PROGRESS: "workflow_progress",
+    WORKFLOW_STEP: "workflow_step",
+    WORKFLOW_COMPLETE: "workflow_complete",
+    WORKFLOW_ERROR: "workflow_error",
+    PROMPT_FLOW_RESULT: "prompt_flow_result",
+    PROMPT_FLOW_STEP: "prompt_flow_step",
+    PROMPT_FLOW_PROGRESS: "prompt_flow_progress"
   };
 
   const TOOL_NAMES = {
@@ -724,6 +813,62 @@ export const buildAction = (task: CHAT.Task) => {
         action: "正在生成报告",
         tool: "markdown",
         name: ""
+      };
+
+    case MESSAGE_TYPES.WORKFLOW_START:
+      return {
+        action: "正在启动工作流",
+        tool: "工作流引擎",
+        name: "工作流启动"
+      };
+
+    case MESSAGE_TYPES.WORKFLOW_PROGRESS:
+      return {
+        action: "工作流执行中",
+        tool: "工作流引擎",
+        name: "进度更新"
+      };
+
+    case MESSAGE_TYPES.WORKFLOW_STEP:
+      return {
+        action: "正在执行工作流步骤",
+        tool: "工作流引擎", 
+        name: "步骤执行"
+      };
+
+    case MESSAGE_TYPES.WORKFLOW_COMPLETE:
+      return {
+        action: "工作流执行完成",
+        tool: "工作流引擎",
+        name: "执行完成"
+      };
+
+    case MESSAGE_TYPES.WORKFLOW_ERROR:
+      return {
+        action: "工作流执行异常",
+        tool: "工作流引擎",
+        name: "执行错误"
+      };
+
+    case MESSAGE_TYPES.PROMPT_FLOW_RESULT:
+      return {
+        action: "PromptFlow执行完成",
+        tool: "Prompt流程引擎",
+        name: "流程结果"
+      };
+
+    case MESSAGE_TYPES.PROMPT_FLOW_STEP:
+      return {
+        action: "正在执行流程步骤",
+        tool: "Prompt流程引擎",
+        name: "步骤执行"
+      };
+
+    case MESSAGE_TYPES.PROMPT_FLOW_PROGRESS:
+      return {
+        action: "流程执行中",
+        tool: "Prompt流程引擎",
+        name: "进度更新"
       };
 
     default:
@@ -807,6 +952,14 @@ export enum IconType {
   DEEP_SEARCH = 'deep_search',
   CODE = 'code',
   HTML = 'html',
+  WORKFLOW_START = 'workflow_start',
+  WORKFLOW_PROGRESS = 'workflow_progress',
+  WORKFLOW_STEP = 'workflow_step',
+  WORKFLOW_COMPLETE = 'workflow_complete',
+  WORKFLOW_ERROR = 'workflow_error',
+  PROMPT_FLOW_RESULT = 'prompt_flow_result',
+  PROMPT_FLOW_STEP = 'prompt_flow_step',
+  PROMPT_FLOW_PROGRESS = 'prompt_flow_progress',
 }
 
 /**
@@ -821,6 +974,14 @@ const ICON_MAP: Record<IconType, string> = {
   [IconType.DEEP_SEARCH]: 'icon-sousuo',
   [IconType.CODE]: 'icon-daima',
   [IconType.HTML]: 'icon-daima',
+  [IconType.WORKFLOW_START]: 'icon-gongzuoliu',
+  [IconType.WORKFLOW_PROGRESS]: 'icon-jindu',
+  [IconType.WORKFLOW_STEP]: 'icon-buzhou',
+  [IconType.WORKFLOW_COMPLETE]: 'icon-wancheng',
+  [IconType.WORKFLOW_ERROR]: 'icon-cuowu',
+  [IconType.PROMPT_FLOW_RESULT]: 'icon-wancheng',
+  [IconType.PROMPT_FLOW_STEP]: 'icon-liucheng',
+  [IconType.PROMPT_FLOW_PROGRESS]: 'icon-jindu',
 };
 
 /**

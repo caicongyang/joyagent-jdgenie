@@ -10,8 +10,8 @@ logging:
     root: INFO
 llm:
   default:
-    base_url: '<input llm server here>'
-    apikey: '<input llm key here>'
+    base_url: 'Qwen/QwQ-32B'
+    apikey: 'sk-rowshoriofdmfrnvmuustzsdgmuwcttzldfkiqfzbsbdeqeu'
     interface_url: '/chat/completions'
     model: gpt-4.1
   settings: '{"claude-3-7-sonnet-v1": {

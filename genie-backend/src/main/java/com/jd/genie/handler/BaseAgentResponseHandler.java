@@ -18,7 +18,11 @@ import static com.jd.genie.model.constant.Constants.SUCCESS;
 
 @Slf4j
 @Component
-public class BaseAgentResponseHandler {
+public class BaseAgentResponseHandler implements AgentResponseHandler {
+    @Override
+    public GptProcessResult handle(AgentRequest request, AgentResponse response, List<AgentResponse> agentRespList, EventResult eventResult) {
+        return buildIncrResult(request, eventResult, response);
+    }
     protected GptProcessResult buildIncrResult(AgentRequest request, EventResult eventResult, AgentResponse agentResponse) {
         GptProcessResult streamResult = new GptProcessResult();
         streamResult.setResponseType(ResponseTypeEnum.text.name());

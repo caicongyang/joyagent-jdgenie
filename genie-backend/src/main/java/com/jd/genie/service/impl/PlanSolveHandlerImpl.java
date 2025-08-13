@@ -66,7 +66,12 @@ public class PlanSolveHandlerImpl implements AgentHandlerService {
                         taskCount.countDown();
                     });
                 }
-                ThreadUtil.await(taskCount);
+                try {
+                    ThreadUtil.await(taskCount);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    log.warn("Task execution interrupted", e);
+                }
                 for (ExecutorAgent slaveExecutor : slaveExecutors) {
                     for (int i = memoryIndex; i < slaveExecutor.getMemory().size(); i++) {
                         executor.getMemory().addMessage(slaveExecutor.getMemory().get(i));

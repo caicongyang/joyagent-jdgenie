@@ -35,6 +35,9 @@ declare global {
       message: string;
       outputStyle?: string;
       deepThink: boolean;
+      agentMode?: string;
+      workflowTemplate?: string;
+      executionMode?: string;
     }
 
     export type TAbortController ={

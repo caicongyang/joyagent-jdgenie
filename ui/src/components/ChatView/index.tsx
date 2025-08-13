@@ -54,7 +54,7 @@ const ChatView: GenieType.FC<Props> = (props) => {
   };
 
   const sendMessage = useMemoizedFn((inputInfo: CHAT.TInputInfo) => {
-    const {message, deepThink, outputStyle} = inputInfo;
+    const {message, deepThink, outputStyle, agentMode, workflowTemplate, executionMode} = inputInfo;
     const requestId = getUniqId();
     let currentChat = combineCurrentChat(inputInfo, sessionId, requestId);
     chatList.current =  [...chatList.current, currentChat];
@@ -62,12 +62,24 @@ const ChatView: GenieType.FC<Props> = (props) => {
       setChatTitle(message!);
     }
     setLoading(true);
+    
+    // 根据agentMode确定智能体类型
+    let agentType = 5; // 默认REACT
+    if (agentMode === 'plan_solve') {
+      agentType = 3; // PLAN_SOLVE
+    } else if (agentMode === 'workflow') {
+      agentType = 2; // WORKFLOW
+    }
+    
     const params = {
       sessionId: sessionId,
       requestId: requestId,
       query: message,
       deepThink: deepThink ? 1 : 0,
-      outputStyle
+      outputStyle,
+      agentType,
+      workflowTemplate,
+      executionMode: executionMode || 'batch'
     };
     const handleMessage = (data: MESSAGE.Answer) => {
       const { finished, resultMap, packageType, status } = data;

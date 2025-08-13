@@ -85,6 +85,82 @@ export const InputSize:Record<string, string>  = {
   small: '32'
 };
 
+// 智能体类型枚举
+export enum AgentTypeEnum {
+  COMPREHENSIVE = 1,
+  WORKFLOW = 2,
+  PLAN_SOLVE = 3,
+  ROUTER = 4,
+  REACT = 5,
+  PROMPT_FLOW = 6
+}
+
+// 智能体模式配置
+export const agentModeList = [
+  {
+    name: '快速响应',
+    key: 'react',
+    agentType: AgentTypeEnum.REACT,
+    description: '快速响应模式，适合简单问答和基础任务',
+    icon: 'icon-kuaisuchuli',
+    color: 'text-[#29CC29]'
+  },
+  {
+    name: '深度研究',
+    key: 'plan_solve', 
+    agentType: AgentTypeEnum.PLAN_SOLVE,
+    description: '深度研究模式，适合复杂分析和研究任务',
+    icon: 'icon-shendusikao',
+    color: 'text-[#4040FF]'
+  },
+  {
+    name: '工作流',
+    key: 'workflow',
+    agentType: AgentTypeEnum.WORKFLOW,
+    description: '工作流模式，适合多步骤复杂业务流程处理',
+    icon: 'icon-gongzuoliu',
+    color: 'text-[#FF860D]'
+  },
+  {
+    name: 'Prompt流程',
+    key: 'prompt_flow',
+    agentType: AgentTypeEnum.PROMPT_FLOW,
+    description: '基于Markdown的流程化智能体，支持自定义流程步骤',
+    icon: 'icon-liucheng',
+    color: 'text-[#9C27B0]'
+  }
+];
+
+export const defaultAgentMode = agentModeList[0];
+
+// 工作流模板配置
+export const workflowTemplates = [
+  {
+    id: 'data_analysis',
+    name: '数据分析工作流',
+    description: '包含数据收集、处理、分析和报告生成的完整流程',
+    steps: ['数据收集', '数据处理', '数据分析', '结果报告'],
+    icon: 'icon-shujufenxi',
+    color: 'text-[#4040FF]'
+  },
+  {
+    id: 'research', 
+    name: '研究工作流',
+    description: '包含研究计划、信息搜索、分析和报告的研究流程',
+    steps: ['制定研究计划', '信息搜索', '信息分析', '研究报告'],
+    icon: 'icon-yanjiu',
+    color: 'text-[#29CC29]'
+  },
+  {
+    id: 'problem_solving',
+    name: '问题解决工作流', 
+    description: '包含问题分析、方案设计、评估和实施建议的问题解决流程',
+    steps: ['问题分析', '方案设计', '方案评估', '实施建议'],
+    icon: 'icon-jiejuefangan',
+    color: 'text-[#FF860D]'
+  }
+];
+
 export const demoList = [
   {
     title: 'Browser代码架构分析',

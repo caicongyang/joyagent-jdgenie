@@ -1,0 +1,247 @@
+# 工作流配置文件
+# 定义预设的工作流模板，可通过模板名称或ID引用
+
+workflows:
+  # 数据分析工作流
+  data-analysis:
+    id: "data-analysis-template"
+    name: "数据分析工作流"
+    description: "完整的数据分析流程，包括数据收集、处理、分析和报告"
+    maxSteps: 10
+    timeoutSeconds: 3600
+    variables:
+      analysis_scope: "全面分析"
+      report_format: "详细报告"
+    steps:
+      - id: "data-collection"
+        name: "数据收集"
+        type: "llm_call"
+        prompt: "基于查询需求，确定需要收集什么数据：${query}"
+        systemPrompt: "你是一个数据分析专家，专门负责确定数据收集需求。"
+        timeoutSeconds: 300
+        
+      - id: "data-search"
+        name: "数据搜索"
+        type: "tool_call"
+        toolName: "deep_search"
+        toolArgs:
+          query: "${query} 数据 统计 分析"
+        dependencies: ["data-collection"]
+        retryPolicy:
+          maxRetries: 2
+          retryDelayMs: 1000
+          retryType: "FIXED_DELAY"
+        
+      - id: "data-processing"
+        name: "数据处理"
+        type: "llm_call"
+        prompt: "基于收集到的数据信息 ${step.data-collection} 和搜索结果 ${step.data-search}，制定数据处理方案"
+        systemPrompt: "你是一个数据处理专家，专门负责数据清洗和预处理。"
+        dependencies: ["data-collection", "data-search"]
+        
+      - id: "data-analysis"
+        name: "数据分析"
+        type: "llm_call"
+        prompt: "对处理后的数据进行${analysis_scope}：${step.data-processing}。原始查询：${query}"
+        systemPrompt: "你是一个数据分析专家，专门负责从数据中发现洞察和趋势。"
+        dependencies: ["data-processing"]
+        
+      - id: "result-report"
+        name: "结果报告"
+        type: "tool_call"
+        toolName: "report"
+        toolArgs:
+          content: "${step.data-analysis}"
+          format: "${report_format}"
+        dependencies: ["data-analysis"]
+
+  # 研究工作流
+  research:
+    id: "research-template"
+    name: "研究工作流"
+    description: "深度研究流程，包括计划制定、信息搜索、分析和报告"
+    maxSteps: 8
+    timeoutSeconds: 2400
+    variables:
+      research_depth: "深度研究"
+      search_scope: "全面搜索"
+    steps:
+      - id: "research-planning"
+        name: "制定研究计划"
+        type: "llm_call"
+        prompt: "为以下研究主题制定详细的${research_depth}计划：${query}"
+        systemPrompt: "你是一个研究专家，专门负责制定系统性的研究计划。"
+        
+      - id: "information-search"
+        name: "信息搜索"
+        type: "tool_call"
+        toolName: "deep_search"
+        toolArgs:
+          query: "${query}"
+          scope: "${search_scope}"
+        dependencies: ["research-planning"]
+        retryPolicy:
+          maxRetries: 3
+          retryDelayMs: 2000
+          retryType: "EXPONENTIAL"
+          backoffMultiplier: 2.0
+          maxRetryDelayMs: 10000
+        
+      - id: "information-analysis"
+        name: "信息分析"
+        type: "llm_call"
+        prompt: "分析搜索到的信息：${step.information-search}，并结合研究计划：${step.research-planning}"
+        systemPrompt: "你是一个信息分析专家，专门负责从大量信息中提取关键洞察。"
+        dependencies: ["research-planning", "information-search"]
+        
+      - id: "research-report"
+        name: "生成研究报告"
+        type: "tool_call"
+        toolName: "report"
+        toolArgs:
+          content: "${step.information-analysis}"
+          title: "研究报告：${query}"
+        dependencies: ["information-analysis"]
+
+  # 并行分析工作流
+  parallel-analysis:
+    id: "parallel-analysis-template"
+    name: "并行分析工作流"
+    description: "使用并行处理进行多维度分析"
+    maxSteps: 6
+    timeoutSeconds: 1800
+    steps:
+      - id: "parallel-tasks"
+        name: "并行任务执行"
+        type: "parallel"
+        maxConcurrency: 3
+        waitForAll: true
+        subSteps:
+          - id: "technical-analysis"
+            name: "技术分析"
+            type: "llm_call"
+            prompt: "从技术角度分析：${query}"
+            systemPrompt: "你是一个技术分析专家。"
+            
+          - id: "market-search"
+            name: "市场数据搜索"
+            type: "tool_call"
+            toolName: "deep_search"
+            toolArgs:
+              query: "${query} 市场 趋势 数据"
+              
+          - id: "user-experience-analysis"
+            name: "用户体验分析"
+            type: "llm_call"
+            prompt: "从用户体验角度评估：${query}"
+            systemPrompt: "你是一个用户体验专家。"
+            
+      - id: "synthesis-analysis"
+        name: "综合分析"
+        type: "llm_call"
+        prompt: "综合以下分析结果：技术分析${step.technical-analysis}，市场数据${step.market-search}，用户体验${step.user-experience-analysis}"
+        systemPrompt: "你是一个综合分析专家，专门负责整合多维度分析结果。"
+        dependencies: ["parallel-tasks"]
+
+  # 问题解决工作流
+  problem-solving:
+    id: "problem-solving-template"
+    name: "问题解决工作流"
+    description: "系统性解决复杂问题的流程"
+    maxSteps: 8
+    timeoutSeconds: 2400
+    variables:
+      solution_type: "综合解决方案"
+      evaluation_criteria: "可行性和效果"
+    steps:
+      - id: "problem-analysis"
+        name: "问题分析"
+        type: "llm_call"
+        prompt: "深入分析以下问题：${query}"
+        systemPrompt: "你是一个问题分析专家，专门负责将复杂问题分解为可管理的子问题。"
+        
+      - id: "background-research"
+        name: "背景研究"
+        type: "tool_call"
+        toolName: "deep_search"
+        toolArgs:
+          query: "${query} 解决方案 案例 经验"
+        dependencies: ["problem-analysis"]
+        
+      - id: "solution-design"
+        name: "方案设计"
+        type: "llm_call"
+        prompt: "基于问题分析${step.problem-analysis}和背景研究${step.background-research}，设计${solution_type}"
+        systemPrompt: "你是一个解决方案设计专家，专门负责为复杂问题设计可行的解决方案。"
+        dependencies: ["problem-analysis", "background-research"]
+        
+      - id: "solution-evaluation"
+        name: "方案评估"
+        type: "llm_call"
+        prompt: "评估设计的方案：${step.solution-design}，重点关注${evaluation_criteria}"
+        systemPrompt: "你是一个方案评估专家，专门负责分析解决方案的可行性和风险。"
+        dependencies: ["solution-design"]
+        
+      - id: "implementation-advice"
+        name: "实施建议"
+        type: "llm_call"
+        prompt: "基于方案评估${step.solution-evaluation}，提供具体的实施建议和行动计划"
+        systemPrompt: "你是一个项目实施专家，专门负责将解决方案转化为可执行的实施计划。"
+        dependencies: ["solution-evaluation"]
+
+  # 简单工具流
+  simple-tool-flow:
+    id: "simple-tool-flow-template"
+    name: "简单工具流"
+    description: "演示工具调用的简单工作流"
+    maxSteps: 3
+    timeoutSeconds: 600
+    variables:
+      search_query: "${query}"
+    steps:
+      - id: "search-step"
+        name: "搜索信息"
+        type: "tool_call"
+        toolName: "deep_search"
+        toolArgs:
+          query: "${search_query}"
+        retryPolicy:
+          maxRetries: 2
+          retryDelayMs: 1000
+          
+      - id: "analyze-step"
+        name: "分析结果"
+        type: "llm_call"
+        prompt: "分析搜索结果：${step.search-step}，针对原始问题：${query}"
+        systemPrompt: "你是一个信息分析专家。"
+        dependencies: ["search-step"]
+        
+      - id: "generate-report"
+        name: "生成报告"
+        type: "tool_call"
+        toolName: "report"
+        toolArgs:
+          content: "${step.analyze-step}"
+          title: "分析报告"
+        dependencies: ["analyze-step"]
+        skippable: true
+
+# 工作流配置设置
+settings:
+  # 默认配置
+  defaultConfig:
+    maxSteps: 50
+    timeoutSeconds: 1800
+    retryPolicy:
+      maxRetries: 1
+      retryDelayMs: 1000
+      retryType: "FIXED_DELAY"
+  
+  # 工作流目录
+  workflowDirectory: "classpath:workflows/"
+  
+  # 是否启用工作流缓存
+  enableCache: true
+  
+  # 工作流执行模式
+  defaultExecutionMode: "batch"  # batch 或 step

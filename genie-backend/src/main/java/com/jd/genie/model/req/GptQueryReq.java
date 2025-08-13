@@ -10,6 +10,40 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class GptQueryReq {
+    /**
+     * Set user
+     */
+    public void setUser(String user) {
+        this.user = user;
+    }
+
+    /**
+     * Set deep think
+     */
+    public void setDeepThink(Integer deepThink) {
+        this.deepThink = deepThink;
+    }
+
+    /**
+     * Get deep think
+     */
+    public Integer getDeepThink() {
+        return deepThink;
+    }
+
+    /**
+     * Set trace ID
+     */
+    public void setTraceId(String traceId) {
+        this.traceId = traceId;
+    }
+
+    /**
+     * Get trace ID
+     */
+    public String getTraceId() {
+        return traceId;
+    }
     private String query;
     private String sessionId;
     private String requestId;

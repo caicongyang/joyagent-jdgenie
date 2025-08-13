@@ -580,3 +580,27 @@
   .icon-yiwen::before {
     content: "\e1b6";
   }
+
+  .icon-kuaisuchuli::before {
+    content: "\f3a2";
+  }
+
+  .icon-xiala::before {
+    content: "\e5ab";
+  }
+
+  .icon-gou::before {
+    content: "\e6ca";
+  }
+
+  .icon-shujufenxi::before {
+    content: "\e649";
+  }
+
+  .icon-yanjiu::before {
+    content: "\e9b6";
+  }
+
+  .icon-jiejuefangan::before {
+    content: "\f0c3";
+  }

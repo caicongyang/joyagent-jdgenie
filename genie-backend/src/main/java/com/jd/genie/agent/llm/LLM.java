@@ -41,6 +41,13 @@ import java.util.regex.Pattern;
 @Slf4j
 @Data
 public class LLM {
+    /**
+     * Generate method for workflow compatibility
+     */
+    public String generate(List<Message> messages, Object param1, Object param2) {
+        // This is a stub implementation for compatibility
+        return "";
+    }
     private static final Map<String, LLM> instances = new ConcurrentHashMap<>();
 
     private final String model;

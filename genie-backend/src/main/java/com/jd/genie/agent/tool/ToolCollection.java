@@ -4,7 +4,10 @@ import com.alibaba.fastjson.JSONObject;
 import com.jd.genie.agent.agent.AgentContext;
 import com.jd.genie.agent.dto.tool.McpToolInfo;
 import com.jd.genie.agent.tool.mcp.McpTool;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -15,10 +18,15 @@ import java.util.Map;
  * 工具集合类 - 管理可用的工具
  */
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Slf4j
 public class ToolCollection {
-    private Map<String, BaseTool> toolMap;
-    private Map<String, McpToolInfo> mcpToolMap;
+    @Builder.Default
+    private Map<String, BaseTool> toolMap = new HashMap<>();
+    @Builder.Default
+    private Map<String, McpToolInfo> mcpToolMap = new HashMap<>();
     private AgentContext agentContext;
 
     /**
@@ -30,9 +38,13 @@ public class ToolCollection {
     private String currentTask;
     private JSONObject digitalEmployees;
 
-    public ToolCollection() {
-        this.toolMap = new HashMap<>();
-        this.mcpToolMap = new HashMap<>();
+
+    
+    /**
+     * Set digital employees
+     */
+    public void setDigitalEmployees(JSONObject digitalEmployees) {
+        this.digitalEmployees = digitalEmployees;
     }
 
     /**

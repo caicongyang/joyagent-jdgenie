@@ -1,51 +1,140 @@
 package com.jd.genie.agent.util;
 
-import org.apache.commons.lang3.concurrent.BasicThreadFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.concurrent.*;
 
+/**
+ * 线程工具类 - 为工作流并行执行提供线程管理
+ */
+@Slf4j
 public class ThreadUtil {
-    private static ThreadPoolExecutor executor = null;
-
-    private ThreadUtil() {
+    
+    /**
+     * 默认线程池
+     */
+    private static final ExecutorService DEFAULT_EXECUTOR = Executors.newCachedThreadPool(r -> {
+        Thread t = new Thread(r);
+        t.setName("WorkflowThread-" + System.currentTimeMillis());
+        t.setDaemon(true);
+        return t;
+    });
+    
+    /**
+     * 自定义线程池
+     */
+    private static ExecutorService customExecutor = null;
+    
+    /**
+     * 设置自定义线程池
+     */
+    public static void setCustomExecutor(ExecutorService executor) {
+        customExecutor = executor;
     }
-
-    public static synchronized void initPool(int poolSize) {
-        if (executor == null) {
-            ThreadFactory threadFactory = (new BasicThreadFactory.Builder()).namingPattern("exe-pool-%d").daemon(true).build();
-            RejectedExecutionHandler handler = (r, executor) -> {
-            };
-            int maxPoolSize = Math.max(poolSize, 1000);
-            executor = new ThreadPoolExecutor(poolSize, maxPoolSize, 60000L, TimeUnit.MILLISECONDS, new SynchronousQueue(), threadFactory, handler);
-        }
-
+    
+    /**
+     * 获取当前使用的线程池
+     */
+    public static ExecutorService getExecutor() {
+        return customExecutor != null ? customExecutor : DEFAULT_EXECUTOR;
     }
-
-    public static void execute(Runnable runnable) {
-        if (executor == null) {
-            initPool(100);
-        }
-
-        executor.execute(runnable);
+    
+    /**
+     * 异步执行任务
+     */
+    public static Future<?> execute(Runnable task) {
+        return getExecutor().submit(task);
     }
-
+    
+    /**
+     * 异步执行任务并返回结果
+     */
+    public static <T> Future<T> execute(Callable<T> task) {
+        return getExecutor().submit(task);
+    }
+    
+    /**
+     * 创建CountDownLatch
+     */
     public static CountDownLatch getCountDownLatch(int count) {
         return new CountDownLatch(count);
     }
-
-    public static void await(CountDownLatch latch) {
-        try {
-            latch.await();
-        } catch (Exception var2) {
+    
+    /**
+     * 等待CountDownLatch完成
+     */
+    public static void await(CountDownLatch latch) throws InterruptedException {
+        latch.await();
+    }
+    
+    /**
+     * 等待CountDownLatch完成（带超时）
+     */
+    public static boolean await(CountDownLatch latch, long timeout, TimeUnit unit) throws InterruptedException {
+        return latch.await(timeout, unit);
+    }
+    
+    /**
+     * 创建信号量
+     */
+    public static Semaphore getSemaphore(int permits) {
+        return new Semaphore(permits);
+    }
+    
+    /**
+     * 等待所有Future完成
+     */
+    public static void waitForAll(Future<?>... futures) throws ExecutionException, InterruptedException {
+        for (Future<?> future : futures) {
+            future.get();
         }
     }
-
+    
+    /**
+     * 等待所有Future完成（带超时）
+     */
+    public static void waitForAll(long timeout, TimeUnit unit, Future<?>... futures) 
+            throws ExecutionException, InterruptedException, TimeoutException {
+        for (Future<?> future : futures) {
+            future.get(timeout, unit);
+        }
+    }
+    
+    /**
+     * 休眠指定时间
+     */
     public static void sleep(long millis) {
         try {
             Thread.sleep(millis);
-        } catch (InterruptedException var3) {
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            log.warn("Thread sleep interrupted", e);
         }
     }
-
-
+    
+    /**
+     * 关闭线程池
+     */
+    public static void shutdown() {
+        if (customExecutor != null) {
+            customExecutor.shutdown();
+            try {
+                if (!customExecutor.awaitTermination(60, TimeUnit.SECONDS)) {
+                    customExecutor.shutdownNow();
+                }
+            } catch (InterruptedException e) {
+                customExecutor.shutdownNow();
+                Thread.currentThread().interrupt();
+            }
+        }
+    }
+    
+    /**
+     * 立即关闭线程池
+     */
+    public static void shutdownNow() {
+        if (customExecutor != null) {
+            customExecutor.shutdownNow();
+        }
+    }
 }

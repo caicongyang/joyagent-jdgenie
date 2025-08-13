@@ -13,6 +13,26 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 public class GptProcessResult {
+    /**
+     * Set response type
+     */
+    public void setResponseType(String responseType) {
+        this.responseType = responseType;
+    }
+    
+    /**
+     * Set status
+     */
+    public void setStatus(String status) {
+        this.status = status;
+    }
+    
+    /**
+     * Set result map
+     */
+    public void setResultMap(Map<String, Object> resultMap) {
+        this.resultMap = resultMap;
+    }
     private String status;//状态
     private String response = "";//增量内容回复
     private String responseAll = "";//全量内容回复

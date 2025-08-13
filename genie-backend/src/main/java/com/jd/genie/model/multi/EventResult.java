@@ -65,6 +65,20 @@ public class EventResult {
         this.taskId = UUID.randomUUID().toString();
         return this.taskId;
     }
+    
+    /**
+     * Get task order
+     */
+    public AtomicInteger getTaskOrder() {
+        return taskOrder;
+    }
+    
+    /**
+     * Get stream task message type
+     */
+    public List<String> getStreamTaskMessageType() {
+        return streamTaskMessageType;
+    }
 
     /**
      * 增量任务-流式消息类型
@@ -80,6 +94,13 @@ public class EventResult {
      * 全量结果（回放）
      */
     private Map<String, Object> resultMap = new HashMap<>();
+    
+    /**
+     * Get result map
+     */
+    public Map<String, Object> getResultMap() {
+        return resultMap;
+    }
 
     public List<Object> getResulMapTask() {
         if (this.resultMap.containsKey("tasks")) {

@@ -19,6 +19,82 @@ import java.util.regex.Pattern;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AgentResponse {
+    /**
+     * Get message ID
+     */
+    public String getMessageId() {
+        return messageId;
+    }
+    
+    /**
+     * Get message type
+     */
+    public String getMessageType() {
+        return messageType;
+    }
+    
+    /**
+     * Get result
+     */
+    public String getResult() {
+        return result;
+    }
+    
+    /**
+     * Get finish
+     */
+    public Boolean getFinish() {
+        return finish;
+    }
+    
+    /**
+     * Get is final
+     */
+    public Boolean getIsFinal() {
+        return isFinal;
+    }
+    
+    /**
+     * Get result map
+     */
+    public Map<String, Object> getResultMap() {
+        return resultMap;
+    }
+    
+    /**
+     * Get plan
+     */
+    public Plan getPlan() {
+        return plan;
+    }
+    
+    /**
+     * Get plan thought
+     */
+    public String getPlanThought() {
+        return planThought;
+    }
+    
+    /**
+     * Get content - for workflow compatibility
+     */
+    public String getContent() {
+        return result;
+    }
+    
+    /**
+     * Get data - for workflow compatibility
+     */
+    public Object getData() {
+        return resultMap;
+    }
+    
+    /**
+     * Get type - for workflow compatibility
+     */
+    public String getType() {
+        return messageType;
+    }
     private String requestId;
     private String messageId;
     private Boolean isFinal;
@@ -59,13 +135,12 @@ public class AgentResponse {
     }
 
     public static Plan formatSteps(Plan plan) {
-        Plan newplan = Plan.builder()
-                .title(plan.title)
-                .steps(new ArrayList<>())
-                .stages(new ArrayList<>())
-                .stepStatus(new ArrayList<>())
-                .notes(new ArrayList<>())
-                .build();
+        Plan newplan = new Plan();
+        newplan.setTitle(plan.title);
+        newplan.setSteps(new ArrayList<>());
+        newplan.setStages(new ArrayList<>());
+        newplan.setStepStatus(new ArrayList<>());
+        newplan.setNotes(new ArrayList<>());
         Pattern pattern = Pattern.compile("执行顺序(\\d+)\\.\\s?([\\w\\W]*)\\s?[：:](.*)");
         for (int i = 0; i < plan.getSteps().size(); i++) {
             newplan.getStepStatus().add(plan.getStepStatus().get(i));

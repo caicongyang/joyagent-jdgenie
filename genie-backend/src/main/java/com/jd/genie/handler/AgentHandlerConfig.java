@@ -23,6 +23,10 @@ public class AgentHandlerConfig {
                 map.put(AgentType.PLAN_SOLVE, handler);
             } else if (handler instanceof ReactAgentResponseHandler) {
                 map.put(AgentType.REACT, handler);
+            } else if (handler instanceof WorkflowAgentResponseHandler) {
+                map.put(AgentType.WORKFLOW, handler);
+            } else if (handler instanceof PromptFlowAgentResponseHandler) {
+                map.put(AgentType.PROMPT_FLOW, handler);
             }
             // 可扩展更多 handler
         }

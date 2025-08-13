@@ -16,6 +16,9 @@ import java.util.Map;
 
 @Slf4j
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class McpTool implements BaseTool {
     private AgentContext agentContext;
 
