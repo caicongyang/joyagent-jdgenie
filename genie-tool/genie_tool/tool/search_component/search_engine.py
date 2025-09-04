@@ -1,10 +1,11 @@
-# -*- coding: utf-8 -*-
-# =====================
-# 
-# 
-# Author: liumin.423
-# Date:   2025/7/9
-# =====================
+"""
+搜索引擎适配器集合
+
+包含：
+- SearchBase：基础能力（统一 count/timeout、内容解析 parser、去重 search_and_dedup）
+- BingSearch/JinaSearch/SogouSearch/SerperSearch：各类引擎的请求封装
+- MixSearch：多引擎并行检索与合并
+"""
 import asyncio
 import json
 import os
@@ -19,7 +20,7 @@ from genie_tool.util.log_util import timer
 
 
 class SearchBase(ABC):
-    """搜索基类"""
+    """搜索基类：统一参数、内容解析与去重流程"""
 
     def __init__(self):
         self._count = int(os.getenv("SEARCH_COUNT", 10))
@@ -34,6 +35,7 @@ class SearchBase(ABC):
     @staticmethod
     @timer()
     async def parser(docs: List[Doc], timeout: int=10, **kwargs) -> List[Doc]:
+        """批量抓取链接正文并抽取文本，更新到 Doc.content"""
         async def _parser(source_url, timeout):
             async with aiohttp.ClientSession() as session:
                 try:
@@ -92,12 +94,14 @@ class BingSearch(SearchBase):
         self.set_auth()
 
     def set_auth(self):
+        """根据是否使用网关设置认证头"""
         if self._use_jd_gateway:
             self.headers["Authorization"] = f"Bearer {self._api_key}"
         else:
             self.headers["Ocp-Apim-Subscription-Key"] = self._api_key
 
     def construct_body(self, query: str, request_id: str = None):
+        """构造不同模式下的请求体"""
         if self._use_jd_gateway:
             return {
                 "request_id": request_id,
@@ -194,6 +198,7 @@ class SerperSearch(JinaSearch):
         self.set_auth()
     
     def set_auth(self):
+        """Serper 使用专用 X-API-KEY"""
         self.headers["X-API-KEY"] = self._api_key
 
     def construct_body(self, query: str, request_id: str = None):

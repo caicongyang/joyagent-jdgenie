@@ -1,3 +1,9 @@
+"""
+文件信息 ORM 模型（SQLAlchemy Declarative）
+
+与 `db/file_table.py` 的 SQLModel 版本类似，用于不同场景的 ORM 需求。
+"""
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 from datetime import datetime

@@ -1,10 +1,8 @@
-# -*- coding: utf-8 -*-
-# =====================
-# 
-# 
-# Author: liumin.423
-# Date:   2025/7/9
-# =====================
+"""
+文件信息数据表模型
+
+使用 SQLModel 定义文件记录结构，包含元信息与创建时间。
+"""
 from datetime import datetime
 from typing import Optional
 

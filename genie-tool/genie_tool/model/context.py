@@ -1,16 +1,16 @@
-# -*- coding: utf-8 -*-
-# =====================
-# 
-# 
-# Author: liumin.423
-# Date:   2025/7/8
-# =====================
+"""
+请求上下文与模型信息
+
+- RequestIdCtx：使用 contextvars 保存每次请求的 request_id，线程/协程安全
+- LLMModelInfoFactory：注册并查询不同模型的上下文长度与最大输出，用于裁剪输入
+"""
 import contextvars
 
 from pydantic import BaseModel
 
 
 class _RequestIdCtx(object):
+    """请求上下文对象：读写当前 request_id"""
     def __init__(self):
         self._request_id = contextvars.ContextVar("request_id", default="default-request-id")
 
@@ -27,12 +27,14 @@ RequestIdCtx = _RequestIdCtx()
 
 
 class LLMModelInfo(BaseModel):
+    """模型信息：上下文长度与最大输出"""
     model: str
     context_length: int
     max_output: int
 
 
 class _LLMModelInfoFactory:
+    """模型信息注册/查询工厂"""
 
     def __init__(self):
         self._factory = {}

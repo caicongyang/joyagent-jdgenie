@@ -1,10 +1,8 @@
-# -*- coding: utf-8 -*-
-# =====================
-# 
-# 
-# Author: liumin.423
-# Date:   2025/7/7
-# =====================
+"""
+请求/响应协议模型
+
+定义 API 层与内部处理所需的数据结构（Pydantic 模型）。
+"""
 import hashlib
 from typing import Optional, Literal, List
 
@@ -12,11 +10,10 @@ from pydantic import BaseModel, Field, computed_field
 
 
 class StreamMode(BaseModel):
-    """流式模式
-    args:
-        mode: 流式模式 general 普通流式 token 按token流式 time 按时间流式
-        token: 流式模式下，每多少个token输出一次
-        time: 流式模式下，每多少秒输出一次
+    """流式模式配置
+
+    - mode: general（逐 chunk 输出），token（每 N token 输出），time（每 T 秒输出）
+    - token/time: 仅在对应模式下生效
     """
     mode: Literal["general", "token", "time"] = Field(default="general")
     token: Optional[int] = Field(default=5, ge=1)
@@ -48,6 +45,7 @@ class FileRequest(BaseModel):
 
 
 def get_file_id(request_id: str, file_name: str) -> str:
+    """基于 request_id + file_name 的 MD5 生成稳定 file_id"""
     return hashlib.md5((request_id + file_name).encode("utf-8")).hexdigest()
 
 

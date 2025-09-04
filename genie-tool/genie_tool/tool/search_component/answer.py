@@ -1,10 +1,8 @@
-# -*- coding: utf-8 -*-
-# =====================
-# 
-# 
-# Author: liumin.423
-# Date:   2025/7/9
-# =====================
+"""
+搜索问答生成模块
+
+根据已检索与整理的内容，调用 LLM 生成最终答案（流式）。
+"""
 import os
 import time
 
@@ -15,6 +13,17 @@ from genie_tool.util.prompt_util import get_prompt
 
 @timer()
 async def answer_question(query: str, search_content: str):
+    """
+    基于检索内容生成答案（支持流式返回）
+
+    参数：
+    - query: 用户原始问题
+    - search_content: 已结构化/拼接的检索内容
+
+    行为：
+    - 从 prompt 配置读取模板，注入 query、检索内容、当前时间、目标长度
+    - 调用 LLM（流式），逐片段 yield 内容
+    """
     prompt_template = get_prompt("deepsearch")["answer_prompt"]
 
     model = os.getenv("SEARCH_ANSWER_MODEL", "gpt-4.1")

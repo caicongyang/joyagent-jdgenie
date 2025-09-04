@@ -1,0 +1,19 @@
+# PPT生成器演示配置文件
+# 复制此文件为 .env 并填入实际的API密钥
+
+# OpenAI API配置（推荐）
+OPENAI_API_KEY=your-openai-api-key-here
+OPENAI_BASE_URL=https://api.openai.com/v1
+
+# DeepSeek API配置（备选）
+DEEPSEEK_API_KEY=your-deepseek-api-key-here
+DEEPSEEK_BASE_URL=https://api.deepseek.com
+
+# 模型配置
+REPORT_MODEL=gpt-4o-mini
+
+# 敏感词过滤（可选）
+SENSITIVE_WORD_REPLACE=false
+
+# 文件服务器配置（可选，用于文件上传）
+FILE_SERVER_URL=http://localhost:8000

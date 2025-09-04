@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
-# =====================
-# 
-# 
-# Author: liumin.423
-# Date:   2025/7/9
-# =====================
+"""
+查询分解模块
+
+将复杂查询拆分为多个子查询，便于后续多引擎检索与聚合。
+流程：先思考（think），再根据思考结果进行正式的 queries 生成。
+"""
 import os
 import re
 import time
@@ -22,11 +21,19 @@ async def query_decompose(
         query: str,
         **kwargs
 ):
+    """
+    将单个复杂问题拆分为子查询列表
+
+    步骤：
+    1) 使用 think_model 先行“思考”，得到隐式分析文本
+    2) 将思考结果作为输入，调用 model 生成子查询（Markdown 列表格式）
+    3) 解析列表项（- item）为纯文本数组
+    """
     model = os.getenv("QUERY_DECOMPOSE_MODEL", "gpt-4.1")
     think_model = os.getenv("QUERY_DECOMPOSE_THINK_MODEL", "gpt-4.1")
     current_date = time.strftime("%Y-%m-%d", time.localtime())
     decompose_prompt = get_prompt("deepsearch")
-    # think
+    # think 阶段：生成隐式思考文本（流式累加）
     think_content = ""
     async for chunk in ask_llm(
             messages=decompose_prompt["query_decompose_think_prompt"].format(task=query, retrieval_str=""),
@@ -39,7 +46,7 @@ async def query_decompose(
 
     logger.info(f"{RequestIdCtx.request_id} query_decompose think: {think_content}")
 
-    # decompose
+    # decompose 阶段：根据思考结果正式生成子查询
     messages = [
         {
             "role": "system",
@@ -59,7 +66,7 @@ async def query_decompose(
 
     logger.info(f"{RequestIdCtx.request_id} query_decompose queries: {extend_queries}")
 
-    # 解析
+    # 解析 Markdown 列表为纯文本数组
     queries = re.findall(r"^- (.+)$", extend_queries, re.MULTILINE)
     return [match.strip() for match in queries]
 

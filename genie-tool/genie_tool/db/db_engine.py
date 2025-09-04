@@ -1,10 +1,11 @@
-# -*- coding: utf-8 -*-
-# =====================
-# 
-# 
-# Author: liumin.423
-# Date:   2025/7/9
-# =====================
+"""
+数据库引擎与会话管理
+
+提供：
+- 同步 engine（用于建表）
+- 异步 engine + session 工厂（业务查询）
+- FastAPI 依赖的异步 session 生成器
+"""
 import os
 from typing import Callable, AsyncGenerator
 
@@ -31,12 +32,13 @@ async_session_local: Callable[..., AsyncSession] = sessionmaker(bind=async_engin
 
 
 async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
-    """session生成器 作为fast api的Depends选项"""
+    """异步 session 生成器（FastAPI Depends 使用）"""
     async with async_session_local() as session:
         yield session
 
 
 def init_db():
+    """初始化数据库并建表"""
     from genie_tool.db.file_table import FileInfo
     SQLModel.metadata.create_all(engine)
     logger.info(f"DB init done")

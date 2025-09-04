@@ -1,10 +1,11 @@
-# -*- coding: utf-8 -*-
-# =====================
-# 
-# 
-# Author: liumin.423
-# Date:   2025/7/7
-# =====================
+"""
+中间件与请求路由工具
+
+包含：
+- UnknownException：捕获未处理异常并返回 500
+- RequestHandlerRoute：打印 POST 非 multipart 请求的 body（便于排障）
+- HTTPProcessTimeMiddleware：为每个请求生成 request_id 并记录处理耗时
+"""
 import time
 import traceback
 import uuid
@@ -21,6 +22,7 @@ from genie_tool.util.log_util import AsyncTimer
 
 
 class UnknownException(BaseHTTPMiddleware):
+    """全局异常兜底中间件：避免未捕获异常导致 500 栈信息外泄"""
 
     async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
         try:
@@ -31,6 +33,11 @@ class UnknownException(BaseHTTPMiddleware):
 
 
 class RequestHandlerRoute(APIRoute):
+    """
+    自定义路由：
+    - 对 POST 且非 multipart/form-data 的请求，打印 body 内容到日志
+    - 其他请求透传
+    """
 
     def get_route_handler(self) -> Callable:
         original_route_handler = super().get_route_handler()
@@ -50,6 +57,7 @@ class RequestHandlerRoute(APIRoute):
 
 
 class HTTPProcessTimeMiddleware(BaseHTTPMiddleware):
+    """记录请求处理耗时，并在响应头中注入 `X-Process-Time`"""
     async def dispatch(self, request, call_next):
         RequestIdCtx.request_id = str(uuid.uuid4())
         async with AsyncTimer(key=f"{request.method} {request.url.path}") as t:
