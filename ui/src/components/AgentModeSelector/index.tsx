@@ -19,7 +19,6 @@ const AgentModeSelector: React.FC<AgentModeSelectorProps> = ({
   const [popoverVisible, setPopoverVisible] = useState(false);
 
   const currentMode = agentModeList.find(mode => mode.key === selectedMode) || defaultAgentMode;
-  const isWorkflowMode = currentMode.agentType === AgentTypeEnum.WORKFLOW;
 
   const handleModeSelect = (mode: any) => {
     setSelectedMode(mode.key);

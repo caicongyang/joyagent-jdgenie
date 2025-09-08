@@ -25,7 +25,10 @@ export const combineData = (
     }
     case "prompt_flow_result":
     case "prompt_flow_step":
-    case "prompt_flow_progress": {
+    case "prompt_flow_progress":
+    case "prompt_flow_plan_generated":
+    case "prompt_flow_execution_complete":
+    case "prompt_flow_error": {
       handlePromptFlowMessage(eventData, currentChat);
       break;
     }
@@ -587,6 +590,9 @@ export const handleTaskData = (
     "prompt_flow_result",
     "prompt_flow_step",
     "prompt_flow_progress",
+    "prompt_flow_plan_generated",
+    "prompt_flow_execution_complete",
+    "prompt_flow_error",
   ];
 
   currentChat.thought = planThought || "";
@@ -754,7 +760,10 @@ export const buildAction = (task: CHAT.Task) => {
     WORKFLOW_ERROR: "workflow_error",
     PROMPT_FLOW_RESULT: "prompt_flow_result",
     PROMPT_FLOW_STEP: "prompt_flow_step",
-    PROMPT_FLOW_PROGRESS: "prompt_flow_progress"
+    PROMPT_FLOW_PROGRESS: "prompt_flow_progress",
+    PROMPT_FLOW_PLAN_GENERATED: "prompt_flow_plan_generated",
+    PROMPT_FLOW_EXECUTION_COMPLETE: "prompt_flow_execution_complete",
+    PROMPT_FLOW_ERROR: "prompt_flow_error"
   };
 
   const TOOL_NAMES = {
@@ -960,6 +969,9 @@ export enum IconType {
   PROMPT_FLOW_RESULT = 'prompt_flow_result',
   PROMPT_FLOW_STEP = 'prompt_flow_step',
   PROMPT_FLOW_PROGRESS = 'prompt_flow_progress',
+  PROMPT_FLOW_PLAN_GENERATED = 'prompt_flow_plan_generated',
+  PROMPT_FLOW_EXECUTION_COMPLETE = 'prompt_flow_execution_complete',
+  PROMPT_FLOW_ERROR = 'prompt_flow_error',
 }
 
 /**
@@ -982,6 +994,9 @@ const ICON_MAP: Record<IconType, string> = {
   [IconType.PROMPT_FLOW_RESULT]: 'icon-wancheng',
   [IconType.PROMPT_FLOW_STEP]: 'icon-liucheng',
   [IconType.PROMPT_FLOW_PROGRESS]: 'icon-jindu',
+  [IconType.PROMPT_FLOW_PLAN_GENERATED]: 'icon-renwu',
+  [IconType.PROMPT_FLOW_EXECUTION_COMPLETE]: 'icon-wancheng',
+  [IconType.PROMPT_FLOW_ERROR]: 'icon-cuowu',
 };
 
 /**

@@ -69,6 +69,8 @@ const ChatView: GenieType.FC<Props> = (props) => {
       agentType = 3; // PLAN_SOLVE
     } else if (agentMode === 'workflow') {
       agentType = 2; // WORKFLOW
+    } else if (agentMode === 'prompt_flow') {
+      agentType = 6; // PROMPT_FLOW
     }
     
     const params = {
