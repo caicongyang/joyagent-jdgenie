@@ -845,3 +845,109 @@ JoyAgent-JDGenie 的流式输出系统通过以下几个核心机制实现了高
 5. **性能优化**：异步处理、批量更新、内存管理等策略提升系统整体性能
 
 这种设计不仅实现了流畅的用户体验，也为系统的扩展性和维护性提供了良好的基础。 
+
+## 9. AutoAgent与queryAgentStreamIncr的协作机制
+
+### 9.1 两个接口的职责划分
+
+1. **AutoAgent接口 (`/AutoAgent`)**
+   - 作为底层Agent执行引擎的直接入口
+   - 负责Agent的核心执行逻辑，包括工具调用、上下文管理等
+   - 提供基础的SSE流式输出能力
+   - 主要面向系统内部调用，不直接暴露给外部客户端
+
+2. **queryAgentStreamIncr接口 (`/web/api/v1/gpt/queryAgentStreamIncr`)**
+   - 作为系统对外的统一流式查询入口
+   - 提供更高层的业务封装，处理用户级别的请求参数
+   - 负责请求的预处理和结果的后处理
+   - 直接面向前端应用，提供标准化的接口规范
+
+### 9.2 工作流程
+
+```mermaid
+sequenceDiagram
+    participant Client as 前端
+    participant QAS as queryAgentStreamIncr
+    participant GPS as GptProcessService
+    participant MAS as MultiAgentService
+    participant AA as AutoAgent
+
+    Client->>QAS: 发起流式查询请求
+    QAS->>GPS: 调用queryMultiAgentIncrStream
+    GPS->>GPS: 初始化请求参数
+    GPS->>MAS: 调用searchForAgentRequest
+    MAS->>MAS: 构建AgentRequest
+    MAS->>AA: 发起HTTP请求到AutoAgent
+    AA->>AA: 执行Agent逻辑
+    AA-->>MAS: SSE流式响应
+    MAS-->>GPS: 处理并转发响应
+    GPS-->>QAS: 转发处理后的响应
+    QAS-->>Client: 返回标准化的流式数据
+```
+
+### 9.3 关键实现细节
+
+1. **请求转换与预处理**
+```java
+// GptProcessServiceImpl
+public SseEmitter queryMultiAgentIncrStream(GptQueryReq req) {
+    // 设置超时时间为1小时
+    long timeoutMillis = TimeUnit.HOURS.toMillis(1);
+    // 预处理请求参数
+    req.setUser("genie");
+    req.setDeepThink(req.getDeepThink() == null ? 0: req.getDeepThink());
+    String traceId = ChateiUtils.getRequestId(req);
+    req.setTraceId(traceId);
+    // 创建SSE发射器
+    final SseEmitter emitter = SseUtil.build(timeoutMillis, req.getTraceId());
+    // 转发到MultiAgentService处理
+    multiAgentService.searchForAgentRequest(req, emitter);
+    return emitter;
+}
+```
+
+2. **请求转发机制**
+```java
+// MultiAgentServiceImpl
+private Request buildHttpRequest(AgentRequest autoReq) {
+    String url = "http://127.0.0.1:8080/AutoAgent";
+    RequestBody body = RequestBody.create(
+        MediaType.parse("application/json"),
+        JSONObject.toJSONString(autoReq)
+    );
+    return new Request.Builder().url(url).post(body).build();
+}
+```
+
+3. **响应处理与转换**
+```java
+// BaseAgentResponseHandler
+protected GptProcessResult buildIncrResult(AgentRequest request, EventResult eventResult, AgentResponse agentResponse) {
+    GptProcessResult streamResult = new GptProcessResult();
+    streamResult.setResponseType(ResponseTypeEnum.text.name());
+    streamResult.setStatus(agentResponse.getFinish() ? SUCCESS : RUNNING);
+    streamResult.setFinished(agentResponse.getFinish());
+    // ... 处理响应数据 ...
+    return streamResult;
+}
+```
+
+### 9.4 优势分析
+
+1. **职责分离**
+   - AutoAgent专注于Agent的核心执行逻辑
+   - queryAgentStreamIncr处理业务层面的请求响应
+
+2. **灵活性**
+   - 支持不同类型的Agent请求处理
+   - 可以根据需要扩展新的处理流程
+
+3. **可维护性**
+   - 清晰的层次结构
+   - 标准化的数据流转
+   - 独立的错误处理机制
+
+4. **性能优化**
+   - 统一的超时控制
+   - 标准化的流式处理
+   - 响应数据的增量传输
